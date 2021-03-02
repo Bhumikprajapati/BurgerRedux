@@ -5,6 +5,7 @@ import classes from './Auth.css';
 import * as actions from '../../store/actions/index';
 import {connect} from  'react-redux';
 import Spinner from '../../components/UI/Spinner/Spinner';
+import {Redirect} from 'react-router-dom';
 class Auth extends Component {
         state={
             controls:{
@@ -79,6 +80,13 @@ class Auth extends Component {
             }
             this.setState({controls: updatedOrderForm, formIsValid: formIsValid});
         }
+componentDidMount(){
+
+    if(!this.props.building && this.props.authRedirectPath!=='/')
+    {
+        this.props.onSetAuthRedirectPath()
+    }
+}
 submitHandler=(e)=>{
 e.preventDefault();
 this.props.onAuth(this.state.controls.email.value,this.state.controls.password.value,this.state.isSignUp)
@@ -118,8 +126,13 @@ let errorMsg=null;
 if(this.props.error){
     errorMsg=(<p>{this.props.error.message}</p>)
 }
+let authenticate=null;
+if(this.props.isAuthenticated){
+    authenticate=<Redirect to={this.props.authRedirectPath} />
+}
         return (
             <div className={classes.Auth}>
+                {authenticate}
                 {errorMsg}
                {form}
                <Button btnType="Danger"  clicked={this.switch} >{this.state.isSignUp?'SIGN IN':'SIGN UP'}</Button>
@@ -131,12 +144,16 @@ if(this.props.error){
 const mapStateToProps=state=>{
     return{
         loading:state.authReducer.loading,
-        error:state.authReducer.error
+        error:state.authReducer.error,
+        isAuthenticated:state.authReducer.token!==null,
+        building:state.burgerReducer.building,
+        authRedirectPath:state.authReducer.authRedirectPath
     }
 }
 const mapDispatchToProps=dispatch=>{
     return{
-        onAuth:(email,password,signOption)=>{dispatch(actions.auth(email,password,signOption))}
+        onAuth:(email,password,signOption)=>{dispatch(actions.auth(email,password,signOption))},
+        onSetAuthRedirectPath:()=>{dispatch(actions.setAuthRedirectPath('/'))}
     }
 }
 

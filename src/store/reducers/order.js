@@ -17,7 +17,7 @@ const reducer=(state=initialState,action)=>{
             const newData={
                 ...action.orderData,
                 id:action.id
-            }
+            } 
             return{
                 ...state,
                 orders:state.orders.concat(newData),
